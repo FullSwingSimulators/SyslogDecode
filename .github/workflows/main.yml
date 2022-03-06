@@ -54,13 +54,13 @@ jobs:
           dotnet-version: 5.0.x
 
       - name: Restore dependencies
-        run: dotnet restore ${{ env.$SOLUTION }}
+        run: dotnet restore ${{ env.SOLUTION }}
 
       - name: Build
-        run: dotnet build ${{ env.$SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
+        run: dotnet build ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
       
       - name: Package
-        run: dotnet pack ${{ env.$SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
+        run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
 
 #      - name: Test
-#        run: dotnet test /p:Configuration=${{ env.CONFIGURATION }} --no-build --verbosity normal ${{ env.$SOLUTION }}
+#        run: dotnet test /p:Configuration=${{ env.CONFIGURATION }} --no-build --verbosity normal ${{ env.SOLUTION }}
