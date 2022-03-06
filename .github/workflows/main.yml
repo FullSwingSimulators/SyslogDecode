@@ -55,9 +55,15 @@ jobs:
         with:
           dotnet-version: 5.0.x
 
-      - name: Build & Package
-        run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --version-suffix ${{ needs.determine_version.outputs.MajorMinorPatch }}
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
       
+      - name: Package
+        run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --version-suffix ${{ needs.determine_version.outputs.MajorMinorPatch }} --no-restore
+
   publish:
     name: Publish NuGet Package
     needs: 
