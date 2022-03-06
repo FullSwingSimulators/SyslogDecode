@@ -64,6 +64,11 @@ jobs:
       - name: Package
         run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --version-suffix ${{ needs.determine_version.outputs.MajorMinorPatch }} --no-restore
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: syslog-decode-artifacts
+          path: ${{ github.workspace }}\SyslogDecode\bin\Package
+
   publish:
     name: Publish NuGet Package
     needs: 
@@ -74,7 +79,7 @@ jobs:
       - name: Download NuGet Package
         uses: actions/download-artifact@v1
         with:
-          name: swing-suite-l10n
+          name: syslog-decode-artifacts
 
       - name: Setup NuGet
         uses: nuget/setup-nuget@v1
@@ -90,5 +95,4 @@ jobs:
         run: nuget sources add -Name "GPR" -Source ${env:NUGET_SOURCE} -UserName ${env:GITHUB_ACTOR} -Password ${env:GITHUB_TOKEN}
 
       - name: Publish to GitHub
-        run: dir *.*
-        # run: nuget push "swing-suite-l10n\*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
+        run: nuget push "syslog-decode-artifactsz\*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
