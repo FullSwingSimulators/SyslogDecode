@@ -1,25 +1,66 @@
 name: .NET
 
 on:
+  create:
+    branches: 
+      - release/**
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-jobs:
-  build:
+env:
+  CONFIGURATION: 'Release'
+  SOLUTION: 'src/SyslogDecodeAll.sln'
 
+jobs:
+  determine_version:
+    name: Determine Version
     runs-on: ubuntu-latest
+    outputs:
+      SemVer: ${{ steps.gitversion.outputs.SemVer }}
+      PreReleaseTag: ${{ steps.gitversion.outputs.PreReleaseTag }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.9
+        with:
+          versionSpec: '5.x'
+
+      - name: Run GitVersion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.9
+
+  build:
+    name: Build and Package
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore src/SyslogDecodeAll.sln
-    - name: Build
-      run: dotnet build --no-restore src/SyslogDecodeAll.sln
-    - name: Test
-      run: dotnet test --no-build --verbosity normal src/SyslogDecodeAll.sln
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-version: latest
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.$SOLUTION }}
+
+      - name: Build
+        run: dotnet build ${{ env.$SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
+      
+      - name: Package
+        run: dotnet pack ${{ env.$SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
+
+#      - name: Test
+#        run: dotnet test /p:Configuration=${{ env.CONFIGURATION }} --no-build --verbosity normal ${{ env.$SOLUTION }}
