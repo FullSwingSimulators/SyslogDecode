@@ -67,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: syslog-decode-artifacts
-          path: ${{ github.workspace }}\SyslogDecode\bin\Package
+          path: ${{ github.workspace }}\SyslogDecode\bin\${{ env.CONFIGURATION }}
 
   publish:
     name: Publish NuGet Package
