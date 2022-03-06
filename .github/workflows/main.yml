@@ -20,6 +20,7 @@ jobs:
     outputs:
       SemVer: ${{ steps.gitversion.outputs.SemVer }}
       PreReleaseTag: ${{ steps.gitversion.outputs.PreReleaseTag }}
+      MajorMinorPatch: ${{ steps.gitversion.outputs.MajorMinorPatch }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -37,6 +38,7 @@ jobs:
   build:
     name: Build and Package
     runs-on: windows-latest
+    needs: determine_version
 
     steps:
       - uses: actions/checkout@v2
@@ -53,14 +55,34 @@ jobs:
         with:
           dotnet-version: 5.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION }}
-
-      - name: Build
-        run: dotnet build ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
+      - name: Build & Package
+        run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --version-suffix ${{ needs.determine_version.outputs.MajorMinorPatch }}
       
-      - name: Package
-        run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore
+  publish:
+    name: Publish NuGet Package
+    needs: 
+      - determine_version
+      - build
+    runs-on: windows-latest
+    steps:
+      - name: Download NuGet Package
+        uses: actions/download-artifact@v1
+        with:
+          name: swing-suite-l10n
 
-#      - name: Test
-#        run: dotnet test /p:Configuration=${{ env.CONFIGURATION }} --no-build --verbosity normal ${{ env.SOLUTION }}
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-version: '5.x'
+          nuget-api-key: ${{ github.token }}
+          nuget-api-key-source: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+
+      - name: Setup GitHub Package Registry
+        env:
+          NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+          GITHUB_TOKEN: ${{ github.token }}
+        run: nuget sources add -Name "GPR" -Source ${env:NUGET_SOURCE} -UserName ${env:GITHUB_ACTOR} -Password ${env:GITHUB_TOKEN}
+
+      - name: Publish to GitHub
+        run: dir *.*
+        # run: nuget push "swing-suite-l10n\*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
