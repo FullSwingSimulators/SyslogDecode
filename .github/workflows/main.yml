@@ -88,11 +88,5 @@ jobs:
           nuget-api-key: ${{ github.token }}
           nuget-api-key-source: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
 
-      - name: Setup GitHub Package Registry
-        env:
-          NUGET_SOURCE: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-          GITHUB_TOKEN: ${{ github.token }}
-        run: nuget sources add -Name "GPR" -Source ${env:NUGET_SOURCE} -UserName ${env:GITHUB_ACTOR} -Password ${env:GITHUB_TOKEN}
-
       - name: Publish to GitHub
-        run: nuget push "syslog-decode-artifacts\*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
+        run: nuget push "syslog-decode-artifacts\*.nupkg" -Source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" -SkipDuplicate -NoSymbols
