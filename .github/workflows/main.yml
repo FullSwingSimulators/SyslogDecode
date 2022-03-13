@@ -12,6 +12,8 @@ on:
       - release/*
       - feature/*
 
+permissions: write-all
+
 env:
   CONFIGURATION: 'Release'
   SOLUTION: 'src/SyslogDecodeAll.sln'
