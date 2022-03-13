@@ -54,7 +54,7 @@ jobs:
         run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} -o:package /p:PackageVersion=${{ steps.gitversion.outputs.AssemblySemVer }}
       
       - name: Add NuGet sources
-        run: dotnet nuget add source https://nuget.pkg.github.com/${{ env.GITHUB_REPOSITORY_OWNER }}/index.json --name github
+        run: dotnet nuget add source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --name github
 
       - name: Publish to GitHub
         run: dotnet nuget push ./package/*.nupkg --source github --api-key ${{ github.token }} --skip-duplicate
