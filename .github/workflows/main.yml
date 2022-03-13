@@ -64,4 +64,4 @@ jobs:
         run: dotnet tool install -g gpr --no-cache -v q
 
       - name: GPR Push
-        run: gpr push --api-key ${{ github.token }} ./package/*.nupkg
+        run: gpr push --api-key ${{ secrets.GHA_PAT }} ./package/*.nupkg
