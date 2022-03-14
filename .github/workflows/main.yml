@@ -7,7 +7,7 @@ on:
       - release/*
       - feature/*
   pull_request:
-    branches: 
+    branches:
       - main
       - release/*
       - feature/*
@@ -33,28 +33,28 @@ jobs:
         uses: gittools/actions/gitversion/setup@v0.9.7
         with:
             versionSpec: '5.x'
-            
-      - name: Check out Code 
+
+      - name: Check out Code
         uses: actions/checkout@v2
         with:
             fetch-depth: 0
-          
+
       - name: Determine Version
         id: gitversion
         uses: gittools/actions/gitversion/execute@v0.9.7
         with:
             useConfigFile: true
-            configFilePath: ./.github/gitversion.yml  
+            configFilePath: ./.github/gitversion.yml
 
       - name: Restore Dependencies
         run: dotnet restore ${{ env.SOLUTION }}
 
       - name: Build
         run: dotnet build ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} --no-restore /p:Version=${{ steps.gitversion.outputs.AssemblySemVer }} /p:AssemblyVersion=${{ steps.gitversion.outputs.AssemblySemVer }} /p:InformationalVersion=${{ steps.gitversion.outputs.InformationalVersion }}
-      
+
       - name: Package
-        run: dotnet pack ${{ env.SOLUTION }} --configuration ${{ env.CONFIGURATION }} -o:package /p:PackageVersion=${{ steps.gitversion.outputs.AssemblySemVer }}
-      
+        run: dotnet pack SyslogDecode\SyslogDecode.csproj --configuration ${{ env.CONFIGURATION }} -o:package /p:PackageVersion=${{ steps.gitversion.outputs.AssemblySemVer }}
+
       #- name: Add NuGet sources
       #  run: dotnet nuget add source --username USERNAME --password ${{ github.token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
 
